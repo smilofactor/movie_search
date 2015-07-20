@@ -13,11 +13,8 @@ function filterArray(element) {
 
 
 function mapArray(element) {
-  if (typeof element === 'string') {
-    return element.trim();
-  } else {
-    return element;
-  }
+  if (typeof element === 'string') { return element.trim(); } 
+  else { return element; }
 };
 
 
@@ -25,97 +22,95 @@ function clearListInfo() {
  //configMap.$IDSearchResults.find('#list_info > li').remove();
  configMap.$IDSearchResults.hide();
 };
-  
+
   
 var initMovieSearch = function(searchTerm) {
   this.searchTerm = searchTerm;
   this.searchArray = [];
-  this.params = new Object();
-  this.namesID = 0;
+  this.params = {};
+  this.html = '';
+  this.movieListObject = [];
 };
+
 
 var MovieSearch = new initMovieSearch(); 
 
 
+function resultsForEach(element, index, array) {
+  console.log('resultsForEach');
+  console.log(element);
+};
+
+function responseForEach(element, index, array) {
+    MovieSearch.movieListObject[element.imdbID] = element;
+    //MovieSearch.movieListObject = element;
+    //console.log('responseMap element: ');
+    //console.log(MovieSearch.movieListObject);
+    //MovieSearch.movieListObject.push(element);
+    return(MovieSearch.movieListObject);
+};
+
+
+function requestForEach(element, index, array) {
+    if (element) {MovieSearch.params.s = element;}
+    $.getJSON(configMap.APIUrl, MovieSearch.params, function(data) {
+    data.Search.forEach(responseForEach);
+    
+    //console.log(data.Search);
+    //return (data.Search);
+    });
+};
 
 
 initMovieSearch.prototype.constructTerm = function() {  
     var movieName = this.searchTerm.split(',') || this.searchTerm;
-
     this.searchArray = movieName.filter(filterArray).map(mapArray);
+    MovieSearch.getRequestMap({searchExp: this.searchArray});
+};
+
+
+initMovieSearch.prototype.searchResultsList = function() {
+    console.log('searchResultsList');
+    console.log(this.movieListObject);
     
-    /*  
-    this.searchArray = this.searchTerm.split(',') || this.searchTerm;
-    this.searchArray = this.searchArray.filter(processArray);
-    console.log(this.searchArray);
+    //this.movieListObject.forEach(resultsForEach);
+    //console.log(results);
+
+    /*
+    for (var key in this.movieListObject){
+      console.log('key: ' + key);}
+
+    //console.log(this.movieListObject);
+    //console.log(results);
+
+
+    $.each(this.movieListObject, function(index,value){
+        console.log('searchResultsList results: ' + value.Title);
+    });
     */
-
-  /*
-    this.searchTerm = movieName;
-    for(this.namesID; this.namesID < this.searchTerm.length; this.namesID++) {
-      this.searchTerm[this.namesID].trim();
-      console.log("this is this.searchTerm[this.namesID]: " + this.searchTerm[this.namesID]);
-      if (this.searchTerm[this.namesID].length >= 2) {
-        console.log('this.searchTerm[this.namesID].length: ' + this.searchTerm[this.namesID].length);
-      this.searchArray.push(this.searchTerm[this.namesID].trim());
-      }
-    }
-    */
-
-    console.log('this.searchArray: ' + this.searchArray);
-
-
 
 };
 
-initMovieSearch.prototype.runnerDelay = function(limitArray) {
-    var limitArray = this.searchArray || limitArray;
-    console.log('delayRunner limitArray: ' + limitArray);
-    console.log('delayRunner this.namesID: ' + this.namesID)
 
-    function counterFunction() {
-      var counterVal = 0;
-      for (counterVal; counterVal < limitArray.length; counterVal++){
-        console.log('counterFunction limitArray.length: ' + limitArray.length);
-      //for (counterVal; counterVal < this.namesID; counterVal++){
-        console.log('counterFunction counterVal: ' + counterVal);
-        //runRequest(counterVal);
+initMovieSearch.prototype.getRequestMap = function(searchParams) {
+if (searchParams.params !== undefined) { console.log('Object.keys searchParams.params before setting: ' + Object.keys(searchParams.params)); }
+  this.params = searchParams.params || {  r: 'json' };
 
-      }
-    };
+  //this.movieListObject.push(searchParams.searchExp.forEach(requestForEach));
+  //searchParams.searchExp.forEach(requestForEach).forEach(responseForEach);
+  searchParams.searchExp.forEach(requestForEach);
 
-    function runRequest(counterVal) {
-      console.log('runRequest counterVal: ' + counterVal);
-      var distanceArray = limitArray[counterVal];
-      setInterval(function() counterFunction(), 4000);
-      console.log('In runRequest limitArray[counterVal]: ' + limitArray[counterVal]);
-    }
 
-    counterFunction();
+  
+  this.movieListObject.push(searchParams.searchExp.forEach(requestForEach));
+
+  //this.searchResultsList(this.movieListObject);
+  this.searchResultsList();
 
 };
 
-  
-initMovieSearch.prototype.getRequest = function(searchExp, params){ 
 
-if (this.params !== undefined) {console.log('Object.keys this.params before setting: ' + Object.keys(this.params)); }
-  console.log('getRequest searchExp: ' + searchExp);
-  this.params = params || {
-    s: searchExp,
-    r: 'json'
-  };
-   
-  $.getJSON(configMap.APIUrl, this.params, function(data){
-  MovieSearch.showResults(data.Search);
-  });
 
- };
- 
-  
-initMovieSearch.prototype.ConstructResults = function() {
-  
-}
-  
 initMovieSearch.prototype.selectItem = function() {
   var params = {};
   $('#list_info li div').one('click', function() {
@@ -131,7 +126,7 @@ initMovieSearch.prototype.selectItem = function() {
     });
   };
 
-  
+
 initMovieSearch.prototype.showResults = function(results) {
     var html = '';
     //clearListInfo();
