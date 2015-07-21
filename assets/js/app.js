@@ -36,28 +36,17 @@ var initMovieSearch = function(searchTerm) {
 var MovieSearch = new initMovieSearch(); 
 
 
-function resultsForEach(element, index, array) {
-  console.log('resultsForEach');
-  console.log(element);
-};
-
-function responseForEach(element, index, array) {
-    MovieSearch.movieListObject[element.imdbID] = element;
-    //MovieSearch.movieListObject = element;
-    //console.log('responseMap element: ');
-    //console.log(MovieSearch.movieListObject);
-    //MovieSearch.movieListObject.push(element);
-    return(MovieSearch.movieListObject);
+function resultsMap(element) {
+  //MovieSearch.html = '<li><div>' + element.Title + ' ' + element.Year + '</li></div>';
+  //configMap.$IDSearchResults.find('#list_info').append(MovieSearch.html);
+  MovieSearch.showResults(element);
 };
 
 
-function requestForEach(element, index, array) {
+function requestMap(element) {
     if (element) {MovieSearch.params.s = element;}
     $.getJSON(configMap.APIUrl, MovieSearch.params, function(data) {
-    data.Search.forEach(responseForEach);
-    
-    //console.log(data.Search);
-    //return (data.Search);
+    data.Search.map(resultsMap);
     });
 };
 
@@ -65,48 +54,14 @@ function requestForEach(element, index, array) {
 initMovieSearch.prototype.constructTerm = function() {  
     var movieName = this.searchTerm.split(',') || this.searchTerm;
     this.searchArray = movieName.filter(filterArray).map(mapArray);
-    MovieSearch.getRequestMap({searchExp: this.searchArray});
+    MovieSearch.processGetRequest({searchExp: this.searchArray});
 };
 
 
-initMovieSearch.prototype.searchResultsList = function() {
-    console.log('searchResultsList');
-    console.log(this.movieListObject);
-    
-    //this.movieListObject.forEach(resultsForEach);
-    //console.log(results);
-
-    /*
-    for (var key in this.movieListObject){
-      console.log('key: ' + key);}
-
-    //console.log(this.movieListObject);
-    //console.log(results);
-
-
-    $.each(this.movieListObject, function(index,value){
-        console.log('searchResultsList results: ' + value.Title);
-    });
-    */
-
-};
-
-
-initMovieSearch.prototype.getRequestMap = function(searchParams) {
+initMovieSearch.prototype.processGetRequest = function(searchParams) {
 if (searchParams.params !== undefined) { console.log('Object.keys searchParams.params before setting: ' + Object.keys(searchParams.params)); }
-  this.params = searchParams.params || {  r: 'json' };
-
-  //this.movieListObject.push(searchParams.searchExp.forEach(requestForEach));
-  //searchParams.searchExp.forEach(requestForEach).forEach(responseForEach);
-  searchParams.searchExp.forEach(requestForEach);
-
-
-  
-  this.movieListObject.push(searchParams.searchExp.forEach(requestForEach));
-
-  //this.searchResultsList(this.movieListObject);
-  this.searchResultsList();
-
+  this.params = searchParams.params || {  r: 'json' };  
+   searchParams.searchExp.map(requestMap);
 };
 
 
@@ -127,14 +82,27 @@ initMovieSearch.prototype.selectItem = function() {
   };
 
 
+
+var html = '';
 initMovieSearch.prototype.showResults = function(results) {
-    var html = '';
-    //clearListInfo();
-    $.each(results, function(index,value){
-    html += '<li><div data-movie-info=\'y_' + value.Year + '-i_' + value.imdbID + '\'>' + value.Title + '  .....Release Year: ' + value.Year + '</div></li>';
-    });
-    configMap.$IDSearchResults.find('#list_info').html(html);
-    this.selectItem();
+  //var html = '';
+  console.log('showResults');
+  console.log(results.Title);
+  html += '<li><div>' + results.Year + ' ' + results.Title + '</div></li>';
+  
+  /*
+  //clearListInfo();
+  $.each(results, function(index,value){
+  console.log('in .each');
+  console.log(value);
+  html += '<li><div data-movie-info=\'y_' + value.Year + '-i_' + value.imdbID + '\'>' + value.Title + '  .....Release Year: ' + value.Year + '</div></li>';
+  //MovieSearch.html += '<li><div data-movie-info=\'y_' + value.Year + '-i_' + value.imdbID + '\'>' + value.Title + '  .....Release Year: ' + value.Year + '</div></li>';
+  });
+*/
+  
+  configMap.$IDSearchResults.find('#list_info').html(html);
+  //configMap.$IDSearchResults.find('#list_info').html(MovieSearch.html);
+  //this.selectItem();
   };
   
   
