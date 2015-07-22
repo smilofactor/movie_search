@@ -51,14 +51,12 @@ $(document).ready(function() {
 
       var dataMap = '';
       if (data.Search !== undefined) {
-        dataMap = data.Search;
+        dataMap = data.Search; 
       } else {
         dataMap = data;
       };
      
-     console.log('In getJSON:');
-     console.log(data);
-     
+      //Have to set the results to be painted properly somehow.
       dataMap.map(function(element) {
         MovieSearch.showResults(element);
       });
