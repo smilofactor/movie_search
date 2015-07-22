@@ -26,7 +26,7 @@ $(document).ready(function() {
   var initMovieSearch = function(searchTerm) {
     this.searchTerm = searchTerm;
     this.searchArray = [];
-    this.params = [];
+    this.params = {};
     this.html = '';
   };
 
@@ -36,32 +36,30 @@ $(document).ready(function() {
  
     console.log('requestMap element:');
     console.log(element); 
-    console.log('requestMap MovieSearch.params.s:');
-    console.log(MovieSearch.params.s);
 
-    var responseKeyVal = '';
+    //console.log('requestMap MovieSearch.params.s:');
+    //console.log(MovieSearch.params.s);
+
+    var responseKey = {};
     if (MovieSearch.params.s !== undefined) {
       MovieSearch.params.s = element;
-      responseKeyVal = 'Search';
+      responseKey.val = 'Search';
     } else if (MovieSearch.params.i !== undefined) {
       MovieSearch.params.i = element;
-      responseKeyVal = 'Title';
+      responseKey.val = 'Title';
     }
-    
-     MovieSearch.params.r = 'json' || MovieSearch.params.r;
-    
+     
     $.getJSON(configMap.APIUrl, MovieSearch.params, function(data) {
-      console.log('resposneKeyVal:');
-      console.log(responseKeyVal);
-      data.Search.map(function(element) {
+      console.log('resposneKey[val]:');
+      console.log(responseKey[val]);
+      //data.Search.map(function(element) {
+      data.responseKey[val].map(function(element) {
         MovieSearch.showResults(element);
       });
     }).done(function() {
-      MovieSearch.params = {};
+      //MovieSearch.params = {};
       MovieSearch.selectItem();
     });
-
-
 
   };
 
@@ -69,7 +67,7 @@ $(document).ready(function() {
     var movieName = this.searchTerm.split(',') || this.searchTerm;
     this.searchArray = movieName.filter(filterArray).map(mapArray);
     MovieSearch.processGetRequest({
-      searchExp: this.searchArray
+    searchExp: this.searchArray
     });
   };
 
@@ -81,16 +79,15 @@ $(document).ready(function() {
 
     console.log(searchParams);
 
-    /*
-    this.params = searchParams.params || {
-      r: 'json'
-    };
-    */
+    
+    this.params.r = 'json';
 
     this.params.s = searchParams.searchExp;
 
     searchParams.searchExp.map(requestMap);
- 
+
+    this.params = {};
+
   };
 
 
