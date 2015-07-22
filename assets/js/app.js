@@ -81,22 +81,18 @@ $(document).ready(function() {
       console.log('Object.keys searchParams.params before setting: ' + Object.keys(searchParams.params));
     }
 
-    console.log(searchParams);
-
+    //console.log(searchParams);
     
     this.params.r = 'json';
-
     this.params.s = searchParams.searchExp;
-
     searchParams.searchExp.map(requestMap);
-
     this.params = {};
 
   };
 
 
   initMovieSearch.prototype.selectItem = function() {
-    console.log('selectItem activated');
+    //console.log('selectItem activated');
     //var params = {};
     
     $('#list_info li div').on('click', function() {
@@ -120,8 +116,6 @@ $(document).ready(function() {
 
       //console.log(MovieSearch.params.i);
       output.map(requestMap);
-
-      //MovieSearch.getRequest("", params);
 
     });
   };
