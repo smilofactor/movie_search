@@ -26,27 +26,42 @@ $(document).ready(function() {
   var initMovieSearch = function(searchTerm) {
     this.searchTerm = searchTerm;
     this.searchArray = [];
-    this.params = {};
+    this.params = [];
     this.html = '';
   };
 
   var MovieSearch = new initMovieSearch();
 
   function requestMap(element) {
-    if (element) {
+ 
+    console.log('requestMap element:');
+    console.log(element); 
+    console.log('requestMap MovieSearch.params.s:');
+    console.log(MovieSearch.params.s);
+
+    var responseKeyVal = '';
+    if (MovieSearch.params.s !== undefined) {
       MovieSearch.params.s = element;
+      responseKeyVal = 'Search';
+    } else if (MovieSearch.params.i !== undefined) {
+      MovieSearch.params.i = element;
+      responseKeyVal = 'Title';
     }
+    
+     MovieSearch.params.r = 'json' || MovieSearch.params.r;
+    
     $.getJSON(configMap.APIUrl, MovieSearch.params, function(data) {
+      console.log('resposneKeyVal:');
+      console.log(responseKeyVal);
       data.Search.map(function(element) {
-        if (MovieSearch.params.i === undefined) {
-          MovieSearch.showResults(element);
-        } else {
-          console.log('A new search goes here');
-        }
+        MovieSearch.showResults(element);
       });
     }).done(function() {
+      MovieSearch.params = {};
       MovieSearch.selectItem();
     });
+
+
 
   };
 
@@ -63,30 +78,49 @@ $(document).ready(function() {
     if (searchParams.params !== undefined) {
       console.log('Object.keys searchParams.params before setting: ' + Object.keys(searchParams.params));
     }
+
+    console.log(searchParams);
+
+    /*
     this.params = searchParams.params || {
       r: 'json'
     };
+    */
+
+    this.params.s = searchParams.searchExp;
+
     searchParams.searchExp.map(requestMap);
+ 
   };
+
 
   initMovieSearch.prototype.selectItem = function() {
     console.log('selectItem activated');
-    var params = {};
+    //var params = {};
+    
     $('#list_info li div').on('click', function() {
       console.log('clicked on #list_info li div');
       console.log($(this).data('movie-info'));
 
-      /*
       //clearListInfo();
-      var output = $(this).data('movie-info');
-      var paramInfo = output.split('-');
-      var yearInfo = paramInfo[0].split('_');
-      var movieID = paramInfo[1].split('_');
-      params.y = yearInfo[1];
-      params.i = movieID[1];
-      params.r = 'json';
-      MovieSearch.getRequest("", params);
-      */
+      var output = [];
+      output.push($(this).data('movie-info'));
+      //var paramInfo = output.split('-');
+      //var yearInfo = paramInfo[0].split('_');
+      //var movieID = paramInfo[1].split('_');
+      //this.params.y = yearInfo[1];
+      //this.params.i = movieID[1];
+      //this.params.r = 'json';
+
+
+      //Why cant I use 'this' here:
+      MovieSearch.params.i = output;
+
+      //console.log(MovieSearch.params.i);
+      output.map(requestMap);
+
+      //MovieSearch.getRequest("", params);
+
     });
   };
 
