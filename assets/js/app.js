@@ -40,20 +40,26 @@ $(document).ready(function() {
     //console.log('requestMap MovieSearch.params.s:');
     //console.log(MovieSearch.params.s);
 
-    var responseKey = {};
+
     if (MovieSearch.params.s !== undefined) {
       MovieSearch.params.s = element;
-      responseKey.val = 'Search';
     } else if (MovieSearch.params.i !== undefined) {
       MovieSearch.params.i = element;
-      responseKey.val = 'Title';
     }
      
     $.getJSON(configMap.APIUrl, MovieSearch.params, function(data) {
-      console.log('resposneKey[val]:');
-      console.log(responseKey[val]);
-      //data.Search.map(function(element) {
-      data.responseKey[val].map(function(element) {
+
+      var dataMap = '';
+      if (data.Search !== undefined) {
+        dataMap = data.Search;
+      } else {
+        dataMap = data;
+      };
+     
+     console.log('In getJSON:');
+     console.log(data);
+     
+      dataMap.map(function(element) {
         MovieSearch.showResults(element);
       });
     }).done(function() {
@@ -112,6 +118,7 @@ $(document).ready(function() {
 
       //Why cant I use 'this' here:
       MovieSearch.params.i = output;
+      MovieSearch.params.r = 'json';
 
       //console.log(MovieSearch.params.i);
       output.map(requestMap);
