@@ -3,12 +3,13 @@ $(document).ready(function() {
 
   var configMap = {
     $IDSearchResults: $('#search_results'),
+    $IDMovieDetails: $('#movie_details'),
     APIUrl: 'http://www.omdbapi.com'
   };
 
   function filterArray(element) {
     return (typeof element !== 'string' || !!element.trim());
-  };
+  }
 
   function mapArray(element) {
     if (typeof element === 'string') {
@@ -16,9 +17,9 @@ $(document).ready(function() {
     } else {
       return element;
     }
-  };
+  }
 
-  function clearListInfo() {
+  function hideListInfo() {
     //configMap.$IDSearchResults.find('#list_info > li').remove();
     configMap.$IDSearchResults.hide();
   };
@@ -28,107 +29,85 @@ $(document).ready(function() {
     this.searchArray = [];
     this.params = {};
     this.html = '';
+    this.i = 0;
   };
 
   var MovieSearch = new initMovieSearch();
 
-  function requestMap(element) {
- 
-    console.log('requestMap element:');
-    console.log(element); 
-
-    //console.log('requestMap MovieSearch.params.s:');
-    //console.log(MovieSearch.params.s);
-
+  function processRequestLoop(element) {
 
     if (MovieSearch.params.s !== undefined) {
       MovieSearch.params.s = element;
     } else if (MovieSearch.params.i !== undefined) {
       MovieSearch.params.i = element;
     }
-     
+
     $.getJSON(configMap.APIUrl, MovieSearch.params, function(data) {
 
-      var dataMap = '';
       if (data.Search !== undefined) {
-        dataMap = data.Search; 
+        data.Search.map(function(element) {
+          MovieSearch.showResultsList(element);
+        });
+
       } else {
-        dataMap = data;
+        MovieSearch.html = '';
+        MovieSearch.showSelectionDetail(data);
       };
-     
-      //Have to set the results to be painted properly somehow.
-      dataMap.map(function(element) {
-        MovieSearch.showResults(element);
-      });
-    }).done(function() {
-      //MovieSearch.params = {};
-      MovieSearch.selectItem();
-    });
+
+    }).done(function(data) {});
 
   };
 
   initMovieSearch.prototype.constructTerm = function() {
     var movieName = this.searchTerm.split(',') || this.searchTerm;
     this.searchArray = movieName.filter(filterArray).map(mapArray);
-    MovieSearch.processGetRequest({
-    searchExp: this.searchArray
+    this.processGetRequest({
+      searchExp: this.searchArray
     });
-  };
 
+  };
 
   initMovieSearch.prototype.processGetRequest = function(searchParams) {
     if (searchParams.params !== undefined) {
       console.log('Object.keys searchParams.params before setting: ' + Object.keys(searchParams.params));
     }
 
-    //console.log(searchParams);
-    
     this.params.r = 'json';
     this.params.s = searchParams.searchExp;
-    searchParams.searchExp.map(requestMap);
+    searchParams.searchExp.map(processRequestLoop);
+
     this.params = {};
 
   };
 
-
-  initMovieSearch.prototype.selectItem = function() {
-    //console.log('selectItem activated');
-    //var params = {};
-    
-    $('#list_info li div').on('click', function() {
-      console.log('clicked on #list_info li div');
-      console.log($(this).data('movie-info'));
-
-      //clearListInfo();
-      var output = [];
-      output.push($(this).data('movie-info'));
-      //var paramInfo = output.split('-');
-      //var yearInfo = paramInfo[0].split('_');
-      //var movieID = paramInfo[1].split('_');
-      //this.params.y = yearInfo[1];
-      //this.params.i = movieID[1];
-      //this.params.r = 'json';
-
-
-      //Why cant I use 'this' here:
-      MovieSearch.params.i = output;
-      MovieSearch.params.r = 'json';
-
-      //console.log(MovieSearch.params.i);
-      output.map(requestMap);
-
-    });
+  initMovieSearch.prototype.showSelectionDetail = function(results) {
+    this.html += '<h2>' + results.Title + '</h2>';
+    console.log('showSelectionDetails: ');
+    console.log(results);
+    configMap.$IDMovieDetails.append(this.html);
   };
 
+  $('#list_info').on('click', 'li div', function() {
+    var output = [];
+    MovieSearch.params = {};
+    MovieSearch.i = 0;
 
-  initMovieSearch.prototype.showResults = function(results) {
-    //console.log('showResults');
-    //console.log(results.Title);
-    this.html += '<li><div data-movie-info=\'' + results.imdbID + '\'>' + results.Year + ' ' + results.Title + '</div></li>';
+    hideListInfo();
+
+    output.push($(this).data('movie-info'));
+
+    MovieSearch.params.i = output;
+    MovieSearch.params.r = 'json';
+
+    output.map(processRequestLoop);
+  });
+
+  initMovieSearch.prototype.showResultsList = function(results) {
+    this.html += '<a><li><div data-movie-info=\'' + results.imdbID + '\'>' + results.Year + ' ' + results.Title + '</div></li></a>';
     configMap.$IDSearchResults.find('#list_info').html(this.html);
   };
 
-  $('#search-term').submit(function(event) {
+  var submitSearch = $('#search-term').submit(function(event) {
     event.preventDefault();
     var searchTerm = $('textarea').val();
     MovieSearch.searchTerm = searchTerm;
