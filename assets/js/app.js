@@ -29,17 +29,16 @@ $(document).ready(function() {
     this.searchArray = [];
     this.params = {};
     this.html = '';
-    this.i = 0;
   };
 
   var MovieSearch = new initMovieSearch();
 
   function processRequestLoop(element) {
 
-    if (MovieSearch.params.s !== undefined) {
-      MovieSearch.params.s = element;
-    } else if (MovieSearch.params.i !== undefined) {
+  if (MovieSearch.params.i !== undefined) {
       MovieSearch.params.i = element;
+    } else {
+      MovieSearch.params.s = element;
     }
 
     $.getJSON(configMap.APIUrl, MovieSearch.params, function(data) {
@@ -73,9 +72,7 @@ $(document).ready(function() {
     }
 
     this.params.r = 'json';
-    this.params.s = searchParams.searchExp;
     searchParams.searchExp.map(processRequestLoop);
-
     this.params = {};
 
   };
@@ -90,7 +87,6 @@ $(document).ready(function() {
   $('#list_info').on('click', 'li div', function() {
     var output = [];
     MovieSearch.params = {};
-    MovieSearch.i = 0;
 
     hideListInfo();
 
